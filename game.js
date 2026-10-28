@@ -11,6 +11,7 @@ class CoinDash extends Phaser.Scene {
     this.add.grid(c.width / 2, c.height / 2, c.width, c.height, 40, 40,
       c.colors.background, 1, 0x24334b, 0.45);
     this.hud = this.add.text(18, 12, '', { font: '18px monospace', color: '#ffffff' });
+    this.hudFx = this.add.text(18, 36, '', { font: '14px monospace', color: '#cffcff' });
     this.player = this.add.rectangle(c.width / 2, c.height / 2, 24, 24, c.colors.player);
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
@@ -31,7 +32,8 @@ class CoinDash extends Phaser.Scene {
       this.score++;
       this.placeCoin();
     });
-    this.physics.add.overlap(this.player, this.drones, () => this.finish('A drone caught you!'));
+    this.physics.add.overlap(this.player, this.drones, () => this.onDroneHit());
+    this.initPowerUps();
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('W,A,S,D,R');
     this.input.keyboard.on('keydown-R', () => this.scene.restart());
@@ -49,6 +51,85 @@ class CoinDash extends Phaser.Scene {
     this.coin.body.reset(x, y);
   }
 
+  initPowerUps() {
+    // Reset all power-up state (called from create(), so R restart works).
+    this.pickup = null;
+    this.shield = false;
+    this.slowUntil = 0;
+    this.graceUntil = 0;
+    this.nextPickupAt = this.time.now + this.pickupDelay();
+  }
+
+  pickupDelay() {
+    const p = COIN_DASH.powerups;
+    return Phaser.Math.Between(p.spawnMinSeconds * 1000, p.spawnMaxSeconds * 1000);
+  }
+
+  spawnPickup() {
+    const c = COIN_DASH;
+    const kind = Math.random() < 0.5 ? 'shield' : 'slow';
+    // Same idea as placeCoin: stay away from the player.
+    let x, y;
+    do {
+      x = Phaser.Math.Between(25, c.width - 25);
+      y = Phaser.Math.Between(70, c.height - 25);
+    } while (Phaser.Math.Distance.Between(x, y, this.player.x, this.player.y) < 60);
+    const shape = kind === 'shield'
+      ? this.add.circle(x, y, 11).setStrokeStyle(4, c.powerups.shieldColor)
+      : this.add.rectangle(x, y, 16, 16, c.powerups.slowColor).setAngle(45);
+    this.pickup = { kind, shape, expiresAt: this.time.now + c.powerups.lifetimeSeconds * 1000 };
+  }
+
+  removePickup() {
+    if (this.pickup) this.pickup.shape.destroy();
+    this.pickup = null;
+    this.nextPickupAt = this.time.now + this.pickupDelay();
+  }
+
+  setDroneSlow(on) {
+    // Drones bounce elastically, so scaling velocity once keeps the speed until reverted.
+    const f = on ? COIN_DASH.powerups.slowFactor : 1 / COIN_DASH.powerups.slowFactor;
+    this.drones.getChildren().forEach((d) => d.body.velocity.scale(f));
+  }
+
+  onDroneHit() {
+    if (this.finished) return;
+    if (this.time.now < this.graceUntil) return;
+    if (!this.shield) return this.finish('A drone caught you!');
+    // Shield absorbs the hit; flash the player and ignore the same drone briefly.
+    this.shield = false;
+    this.graceUntil = this.time.now + 600;
+    this.tweens.add({ targets: this.player, alpha: 0.2, duration: 80, yoyo: true, repeat: 4 });
+  }
+
+  updatePowerUps() {
+    const now = this.time.now;
+    if (this.slowUntil && now >= this.slowUntil) {
+      this.slowUntil = 0;
+      this.setDroneSlow(false);
+    }
+    if (this.pickup) {
+      const p = this.pickup;
+      if (now >= p.expiresAt) {
+        this.removePickup();
+      } else if (Phaser.Math.Distance.Between(p.shape.x, p.shape.y, this.player.x, this.player.y) < 22) {
+        if (p.kind === 'shield') {
+          this.shield = true;
+        } else {
+          if (!this.slowUntil) this.setDroneSlow(true);
+          this.slowUntil = now + COIN_DASH.powerups.slowSeconds * 1000;
+        }
+        this.removePickup();
+      }
+    } else if (now >= this.nextPickupAt) {
+      this.spawnPickup();
+    }
+    const fx = [];
+    if (this.shield) fx.push('Shield');
+    if (this.slowUntil) fx.push(`Slow ${Math.ceil((this.slowUntil - now) / 1000)}s`);
+    this.hudFx.setText(fx.join('  '));
+  }
+
   update() {
     if (this.finished) return;
     const dx = Number(this.cursors.right.isDown || this.keys.D.isDown)
@@ -59,6 +140,7 @@ class CoinDash extends Phaser.Scene {
     this.player.body.setVelocity(direction.x, direction.y);
     const seconds = Math.max(0, Math.ceil((this.deadline - this.time.now) / 1000));
     this.hud.setText(`Coins: ${this.score}                       Time: ${seconds}s`);
+    this.updatePowerUps();
     if (seconds === 0) this.finish('Time is up!');
   }
 
