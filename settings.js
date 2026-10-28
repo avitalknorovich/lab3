@@ -11,6 +11,7 @@ window.COIN_DASH = {
   hunterSize: 20,
   combo: { windowSeconds: 2.0, streakPerStep: 3, maxMultiplier: 4 },
   levels: { coinsPerLevel: 8, speedBoost: 1.1, extraDroneEvery: 3, bonusSeconds: 3, bannerMs: 1200 },
+  sound: { master: 0.5, sfx: 0.5, music: 0.12, tempo: 110 },
   colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a, hunter: 0xff9f1c },
   fx: {
     coinGlow: 0xffd166, droneGlow: 0xff2e63, trailColor: 0x39ffe0, trailLength: 7, trailAlpha: 0.35,
