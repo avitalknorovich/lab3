@@ -67,6 +67,7 @@ class CoinDash extends Phaser.Scene {
     if (window.FX) FX.setup(this);
     UI.setup(this);
     window.THEMES?.apply(this, 1, true);
+    window.SHAPES?.setup(this);
   }
 
   togglePause() {
@@ -257,6 +258,7 @@ class CoinDash extends Phaser.Scene {
   }
 
   update() {
+    window.SHAPES?.update(this);
     if (this.finished || this.paused) return;
     const dx = Number(this.cursors.right.isDown || this.keys.D.isDown)
       - Number(this.cursors.left.isDown || this.keys.A.isDown);
