@@ -19,7 +19,7 @@
       stars.push({ x: Math.random() * c.width, y: 44 + Math.random() * (c.height - 44),
         p: Math.random() * 6.28, s: 0.5 + Math.random() * 1.5 });
     }
-    state.bg = bg; state.stars = stars;
+    state.bg = bg; state.stars = stars; scene.fxState = state;
 
     // Coin glow (soft outer circles) + pulse.
     state.coinGlow = scene.add.circle(0, 0, 22, f.coinGlow, 0.25).setDepth(0);
@@ -57,11 +57,12 @@
       bg.clear();
       // drifting vertical + horizontal lines
       bg.lineStyle(1, f.gridColor, f.gridAlpha);
-      const off = (t * f.gridDrift) % 40;
-      for (let x = -40 + off; x < c.width + 40; x += 40) bg.lineBetween(x, 44, x, c.height);
-      for (let y = 44 + off; y < c.height; y += 40) bg.lineBetween(0, y, c.width, y);
+      const dir = f.gridDir || [1, 1];
+      const offx = (((t * f.gridDrift * dir[0]) % 40) + 40) % 40, offy = (((t * f.gridDrift * dir[1]) % 40) + 40) % 40;
+      for (let x = -40 + offx; x < c.width + 40; x += 40) bg.lineBetween(x, 44, x, c.height);
+      for (let y = 44 + offy; y < c.height; y += 40) bg.lineBetween(0, y, c.width, y);
       stars.forEach((s) => {
-        bg.fillStyle(f.starColor, 0.2 + 0.6 * Math.abs(Math.sin(t * s.s + s.p)));
+        bg.fillStyle(f.starColor, (f.starAlpha === undefined ? 1 : f.starAlpha) * (0.2 + 0.6 * Math.abs(Math.sin(t * s.s + s.p))));
         bg.fillCircle(s.x, s.y, 1.5);
       });
       if (scene.coin) {

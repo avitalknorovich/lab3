@@ -66,6 +66,7 @@ class CoinDash extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', () => this.togglePause());
     if (window.FX) FX.setup(this);
     UI.setup(this);
+    window.THEMES?.apply(this, 1, true);
   }
 
   togglePause() {
@@ -153,9 +154,10 @@ class CoinDash extends Phaser.Scene {
       const a = Math.random() * Math.PI * 2;
       drone.body.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
     }
-    const banner = this.add.text(c.width / 2, c.height / 2, `LEVEL ${this.level}`,
-      { font: 'bold 56px monospace', color: '#ffffff' }).setOrigin(0.5).setDepth(9);
+    const banner = this.add.text(c.width / 2, c.height / 2, `LEVEL ${this.level}` + (window.THEMES ? ' · ' + THEMES.get(this.level).name : ''),
+      { font: 'bold 38px monospace', color: '#ffffff' }).setOrigin(0.5).setDepth(9);
     this.tweens.add({ targets: banner, alpha: 0, duration: lv.bannerMs, onComplete: () => banner.destroy() });
+    window.THEMES?.apply(this, this.level);
   }
   // ---- end combo + levels block ----
 
