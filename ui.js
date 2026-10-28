@@ -43,6 +43,7 @@
     const onUpdate = () => {
       vals.Coins.setText(String(scene.score));
       vals.Best.setText(String(scene.best));
+      if (scene.finished || scene.paused) return; // freeze the clock chip on pause and at round end
       const left = Math.max(0, (scene.deadline - scene.time.now) / 1000);
       vals.Time.setText(Math.ceil(left) + 's');
       const col = left <= 5 ? RED : left <= 10 ? AMBER : accent();
