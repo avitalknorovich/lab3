@@ -30,3 +30,13 @@ window.COIN_DASH = {
     slowColor: 0xb084ff
   }
 };
+
+// Difficulty presets. Normal === the base values above (copied before any preset is applied).
+window.COIN_DASH_BASE = { playerSpeed: COIN_DASH.playerSpeed, droneSpeed: COIN_DASH.droneSpeed,
+  droneCount: COIN_DASH.droneCount, roundSeconds: COIN_DASH.roundSeconds,
+  hunterDelay: COIN_DASH.hunterDelay, hunterSpeed: COIN_DASH.hunterSpeed };
+window.COIN_DASH_PRESETS = {
+  Easy:   { playerSpeed: 260, droneSpeed: 80,  droneCount: 2, roundSeconds: 50, hunterDelay: 22, hunterSpeed: 70 },
+  Normal: Object.assign({}, COIN_DASH_BASE),
+  Hard:   { playerSpeed: 240, droneSpeed: 135, droneCount: 5, roundSeconds: 40, hunterDelay: 10, hunterSpeed: 115 }
+};

@@ -9,3 +9,5 @@ strong { color: #39ffe0; text-shadow: 0 0 6px rgba(57,255,224,.7); }
 #game { border: 2px solid #39ffe0; border-radius: 12px; overflow: hidden;
   box-shadow: 0 0 12px #39ffe0, 0 0 40px rgba(255,43,214,.6), inset 0 0 20px rgba(57,255,224,.35); }
 canvas { display: block; }
+#game { touch-action: none; -webkit-user-select: none; user-select: none; }
+canvas { touch-action: none; }

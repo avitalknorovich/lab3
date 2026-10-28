@@ -1,11 +1,10 @@
 /* global Phaser, COIN_DASH */
-const HIGH_SCORE_KEY = 'coinDash.highScore';
 // localStorage can throw (blocked/private mode), so never let it break the game.
 function loadHighScore() {
-  try { return parseInt(localStorage.getItem(HIGH_SCORE_KEY), 10) || 0; } catch (e) { return 0; }
+  try { return parseInt(localStorage.getItem(highScoreKey()), 10) || 0; } catch (e) { return 0; }
 }
 function saveHighScore(value) {
-  try { localStorage.setItem(HIGH_SCORE_KEY, String(value)); } catch (e) { /* ignore */ }
+  try { localStorage.setItem(highScoreKey(), String(value)); } catch (e) { /* ignore */ }
 }
 
 class CoinDash extends Phaser.Scene {
@@ -58,6 +57,11 @@ class CoinDash extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys('W,A,S,D,R');
     this.input.keyboard.on('keydown-R', () => this.scene.restart());
     this.paused = false; window.SFX?.start();
+    this.hudDiff = this.add.text(c.width - 12, 8, `${window.coinDashDifficulty} [1/2/3]`,
+      { font: '14px monospace', color: '#9fb3c8' }).setOrigin(1, 0).setDepth(50);
+    DIFFICULTY_NAMES.forEach((n, i) => this.input.keyboard.on('keydown-' + (i + 1), () => {
+      setDifficulty(n); this.scene.restart();
+    }));
     this.input.keyboard.on('keydown-P', () => this.togglePause());
     this.input.keyboard.on('keydown-ESC', () => this.togglePause());
     if (window.FX) FX.setup(this);
@@ -259,7 +263,8 @@ class CoinDash extends Phaser.Scene {
       - Number(this.cursors.left.isDown || this.keys.A.isDown);
     const dy = Number(this.cursors.down.isDown || this.keys.S.isDown)
       - Number(this.cursors.up.isDown || this.keys.W.isDown);
-    const direction = new Phaser.Math.Vector2(dx, dy).normalize().scale(COIN_DASH.playerSpeed);
+    let direction = new Phaser.Math.Vector2(dx, dy).normalize().scale(COIN_DASH.playerSpeed);
+    if (!dx && !dy) direction = pointerVelocity(this, this.player) || direction;
     this.player.body.setVelocity(direction.x, direction.y);
     this.updateHunter();
     const seconds = Math.max(0, Math.ceil((this.deadline - this.time.now) / 1000));
