@@ -12,6 +12,13 @@ window.COIN_DASH = {
   combo: { windowSeconds: 2.0, streakPerStep: 3, maxMultiplier: 4 },
   levels: { coinsPerLevel: 8, speedBoost: 1.1, extraDroneEvery: 3, bonusSeconds: 3, bannerMs: 1200 },
   colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a, hunter: 0xff9f1c },
+  fx: {
+    coinGlow: 0xffd166, droneGlow: 0xff2e63, trailColor: 0x39ffe0, trailLength: 7, trailAlpha: 0.35,
+    gridColor: 0xff2bd6, gridAlpha: 0.18, gridDrift: 10, starColor: 0x9ad8ff, starCount: 40,
+    burstColor: 0xffe27a, burstColor2: 0xff2bd6, burstCount: 16,
+    hudColor: '#7dfcff', hudFxColor: '#ff9cf0', hudGlow: '#00e5ff',
+    shakeMs: 250, shakeIntensity: 0.012
+  },
   powerups: {
     spawnMinSeconds: 8,
     spawnMaxSeconds: 12,
