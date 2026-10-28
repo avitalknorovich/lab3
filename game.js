@@ -40,6 +40,7 @@ class CoinDash extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.coin, () => {
       if (this.finished) return;
       this.score++;
+      if (window.FX) FX.burst(this, this.coin.x, this.coin.y);
       this.placeCoin();
     });
     this.physics.add.overlap(this.player, this.drones, () => this.onDroneHit());
@@ -57,6 +58,7 @@ class CoinDash extends Phaser.Scene {
     this.paused = false;
     this.input.keyboard.on('keydown-P', () => this.togglePause());
     this.input.keyboard.on('keydown-ESC', () => this.togglePause());
+    if (window.FX) FX.setup(this);
   }
 
   togglePause() {
@@ -210,6 +212,7 @@ class CoinDash extends Phaser.Scene {
     if (this.finished) return;
     this.finished = true;
     this.physics.pause();
+    if (window.FX) FX.shake(this);
     const c = COIN_DASH;
     const isNewBest = this.score > this.best;
     if (isNewBest) { this.best = this.score; saveHighScore(this.best); }
