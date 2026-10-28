@@ -5,3 +5,5 @@ header > p:first-child { color: #71e8ce; font-size: 12px; letter-spacing: .15em;
 h1 { margin: 0; font-size: 40px; }
 #game { border: 1px solid #34445e; border-radius: 12px; overflow: hidden; }
 canvas { display: block; }
+#game { touch-action: none; -webkit-user-select: none; user-select: none; }
+canvas { touch-action: none; }
