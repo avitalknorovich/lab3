@@ -57,9 +57,9 @@ class CoinDash extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys('W,A,S,D,R');
     this.input.keyboard.on('keydown-R', () => this.scene.restart());
     this.paused = false; window.SFX?.start();
-    this.hudDiff = this.add.text(c.width - 12, 8, `${window.coinDashDifficulty} [1/2/3]`,
-      { font: '14px monospace', color: '#9fb3c8' }).setOrigin(1, 0).setDepth(50);
-    DIFFICULTY_NAMES.forEach((n, i) => this.input.keyboard.on('keydown-' + (i + 1), () => {
+    this.hudDiff = this.add.text(c.width - 12, c.height - 8, `${window.coinDashDifficulty} [1/2/3]`,
+      { font: '14px monospace', color: '#9fb3c8' }).setOrigin(1, 1).setDepth(50);
+    DIFFICULTY_NAMES.forEach((n, i) => this.input.keyboard.on('keydown-' + ['ONE', 'TWO', 'THREE'][i], () => {
       setDifficulty(n); this.scene.restart();
     }));
     this.input.keyboard.on('keydown-P', () => this.togglePause());
