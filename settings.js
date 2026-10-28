@@ -9,6 +9,8 @@ window.COIN_DASH = {
   hunterDelay: 15,
   hunterSpeed: 90,
   hunterSize: 20,
+  combo: { windowSeconds: 2.0, streakPerStep: 3, maxMultiplier: 4 },
+  levels: { coinsPerLevel: 8, speedBoost: 1.1, extraDroneEvery: 3, bonusSeconds: 3, bannerMs: 1200 },
   colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a, hunter: 0xff9f1c },
   powerups: {
     spawnMinSeconds: 8,

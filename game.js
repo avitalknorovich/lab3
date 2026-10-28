@@ -39,11 +39,12 @@ class CoinDash extends Phaser.Scene {
     }
     this.physics.add.overlap(this.player, this.coin, () => {
       if (this.finished) return;
-      this.score++;
+      this.onCoin();
       this.placeCoin();
     });
     this.physics.add.overlap(this.player, this.drones, () => this.onDroneHit());
     this.initPowerUps();
+    this.initComboLevels();
     // The hunter exists from the start but stays hidden and inactive until its spawn time.
     this.hunterAt = this.time.now + c.hunterDelay * 1000;
     this.hunter = this.add.rectangle(0, 0, c.hunterSize, c.hunterSize, c.colors.hunter).setAngle(45);
@@ -76,6 +77,7 @@ class CoinDash extends Phaser.Scene {
       const dt = this.time.now - this.pausedAt;
       this.deadline += dt;
       this.hunterAt += dt;
+      this.comboUntil += dt;
       this.nextPickupAt += dt;
       this.graceUntil += dt;
       if (this.slowUntil) this.slowUntil += dt;
@@ -96,6 +98,62 @@ class CoinDash extends Phaser.Scene {
     this.coin.setPosition(x, y);
     this.coin.body.reset(x, y);
   }
+
+  // ---- Combo + levels block ----
+  initComboLevels() {
+    this.streak = 0;
+    this.comboUntil = 0;
+    this.level = 1;
+    this.comboText = this.add.text(18, 56, '', { font: '16px monospace', color: '#ffd166' });
+    this.levelText = this.add.text(COIN_DASH.width - 18, 12, 'Level 1', { font: '18px monospace', color: '#b084ff' }).setOrigin(1, 0);
+  }
+
+  onCoin() {
+    const cb = COIN_DASH.combo, now = this.time.now;
+    this.streak = (this.streak > 0 && now <= this.comboUntil) ? this.streak + 1 : 1;
+    this.comboUntil = now + cb.windowSeconds * 1000;
+    const mult = Math.min(cb.maxMultiplier, 1 + Math.floor(this.streak / cb.streakPerStep));
+    this.score += mult;
+    if (this.streak >= 2) {
+      this.comboText.setText(`Combo x${mult}`);
+      this.tweens.add({ targets: this.comboText, scale: { from: 1.5, to: 1 }, duration: 150 });
+    }
+    while (this.score >= this.level * COIN_DASH.levels.coinsPerLevel) this.levelUp();
+  }
+
+  updateCombo() {
+    if (this.streak && this.time.now > this.comboUntil) {
+      this.streak = 0;
+      this.comboText.setText('');
+    }
+  }
+
+  levelUp() {
+    const c = COIN_DASH, lv = c.levels;
+    this.level++;
+    this.levelText.setText(`Level ${this.level}`);
+    this.deadline += lv.bonusSeconds * 1000;
+    // Scaling is multiplicative, so it stays compatible with the slow-mo power-up (which also scales).
+    this.drones.getChildren().forEach((d) => d.body.velocity.scale(lv.speedBoost));
+    if (this.level % lv.extraDroneEvery === 0) {
+      const speed = c.droneSpeed * Math.pow(lv.speedBoost, this.level - 1)
+        * (this.slowUntil ? c.powerups.slowFactor : 1);
+      let x, y;
+      do {
+        x = Phaser.Math.Between(40, c.width - 40);
+        y = Phaser.Math.Between(80, c.height - 40);
+      } while (Phaser.Math.Distance.Between(x, y, this.player.x, this.player.y) < 150);
+      const drone = this.add.rectangle(x, y, 26, 26, c.colors.drone);
+      this.drones.add(drone);
+      drone.body.setCollideWorldBounds(true).setBounce(1, 1);
+      const a = Math.random() * Math.PI * 2;
+      drone.body.setVelocity(Math.cos(a) * speed, Math.sin(a) * speed);
+    }
+    const banner = this.add.text(c.width / 2, c.height / 2, `LEVEL ${this.level}`,
+      { font: 'bold 56px monospace', color: '#ffffff' }).setOrigin(0.5).setDepth(9);
+    this.tweens.add({ targets: banner, alpha: 0, duration: lv.bannerMs, onComplete: () => banner.destroy() });
+  }
+  // ---- end combo + levels block ----
 
   initPowerUps() {
     // Reset all power-up state (called from create(), so R restart works).
@@ -203,6 +261,7 @@ class CoinDash extends Phaser.Scene {
     const seconds = Math.max(0, Math.ceil((this.deadline - this.time.now) / 1000));
     this.hud.setText(`Coins: ${this.score}   Best: ${this.best}   Time: ${seconds}s`);
     this.updatePowerUps();
+    this.updateCombo();
     if (seconds === 0) this.finish('Time is up!');
   }
 
