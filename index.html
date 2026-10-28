@@ -2,17 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Coin Dash — Neon</title>
+<title>Coin Dash</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
-  <header><p>LAB 3 · STARTER GAME</p><h1>Coin Dash</h1>
-  <p>Collect yellow coins. Dodge red drones. How many can you collect in 45 seconds?</p></header>
-  <div id="game" aria-label="Coin Dash game. Move with arrow keys or WASD."></div>
-  <p>Move: <strong>arrow keys / WASD</strong> · Pause: <strong>P / Esc</strong> · Restart: <strong>R</strong> · Difficulty: <strong>1/2/3</strong> (Easy/Normal/Hard) · Touch: <strong>drag to move</strong> · <span id="sound-note">Sound: on</span> (<strong>M</strong>)</p>
+  <header class="top">
+    <h1>Coin Dash</h1>
+    <p class="tagline">Collect coins, dodge drones, beat the clock.</p>
+  </header>
+  <section class="card stage"><div id="game" aria-label="Coin Dash game. Move with arrow keys or WASD."></div></section>
+  <section class="card controls" aria-label="Controls">
+    <div class="row"><span class="lbl">Move</span><span><kbd>&larr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd> <i>or</i> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+    <div class="row"><span class="lbl">Pause</span><span><kbd>P</kbd> <i>/</i> <kbd>Esc</kbd></span></div>
+    <div class="row"><span class="lbl">Restart</span><span><kbd>R</kbd></span></div>
+    <div class="row"><span class="lbl">Difficulty</span><span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> <i>Easy / Normal / Hard</i></span></div>
+    <div class="row"><span class="lbl">Touch</span><span><kbd>drag to move</kbd></span></div>
+    <div class="row"><span class="lbl">Sound</span><span><kbd>M</kbd> <span id="sound-note">Sound: on</span></span></div>
+  </section>
 </main>
 <script src="vendor/phaser-3.90.0.min.js"></script>
-<script src="settings.js"></script><script src="input.js"></script><script src="fx.js"></script><script src="sound.js"></script><script src="game.js"></script>
+<script src="settings.js"></script><script src="input.js"></script><script src="fx.js"></script><script src="ui.js"></script><script src="sound.js"></script><script src="game.js"></script>
 </body>
 </html>
