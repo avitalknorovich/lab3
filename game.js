@@ -44,6 +44,13 @@ class CoinDash extends Phaser.Scene {
     });
     this.physics.add.overlap(this.player, this.drones, () => this.onDroneHit());
     this.initPowerUps();
+    // The hunter exists from the start but stays hidden and inactive until its spawn time.
+    this.hunterAt = this.time.now + c.hunterDelay * 1000;
+    this.hunter = this.add.rectangle(0, 0, c.hunterSize, c.hunterSize, c.colors.hunter).setAngle(45);
+    this.physics.add.existing(this.hunter);
+    this.hunter.setVisible(false);
+    this.hunter.body.enable = false;
+    this.physics.add.overlap(this.player, this.hunter, () => this.finish('A hunter got you!'));
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('W,A,S,D,R');
     this.input.keyboard.on('keydown-R', () => this.scene.restart());
@@ -65,7 +72,14 @@ class CoinDash extends Phaser.Scene {
           { font: '24px monospace', color: '#ffffff' }).setOrigin(0.5)
       ]).setDepth(10);
     } else {
-      this.deadline += this.time.now - this.pausedAt;
+      // Shift every timer by the paused time so nothing expires or spawns during a pause.
+      const dt = this.time.now - this.pausedAt;
+      this.deadline += dt;
+      this.hunterAt += dt;
+      this.nextPickupAt += dt;
+      this.graceUntil += dt;
+      if (this.slowUntil) this.slowUntil += dt;
+      if (this.pickup) this.pickup.expiresAt += dt;
       this.physics.resume();
       this.pauseOverlay.destroy();
     }
@@ -134,6 +148,21 @@ class CoinDash extends Phaser.Scene {
     this.tweens.add({ targets: this.player, alpha: 0.2, duration: 80, yoyo: true, repeat: 4 });
   }
 
+  updateHunter() {
+    const c = COIN_DASH;
+    if (!this.hunter.visible) {
+      if (this.time.now < this.hunterAt) return;
+      // Appear in the corner farthest from the player.
+      const x = this.player.x < c.width / 2 ? c.width - 30 : 30;
+      const y = this.player.y < c.height / 2 ? c.height - 30 : 74;
+      this.hunter.setVisible(true).setPosition(x, y);
+      this.hunter.body.enable = true;
+      this.hunter.body.reset(x, y);
+    }
+    // Steer straight at the player each frame; slower than the player so it can be outrun.
+    this.physics.moveToObject(this.hunter, this.player, c.hunterSpeed);
+  }
+
   updatePowerUps() {
     const now = this.time.now;
     if (this.slowUntil && now >= this.slowUntil) {
@@ -170,6 +199,7 @@ class CoinDash extends Phaser.Scene {
       - Number(this.cursors.up.isDown || this.keys.W.isDown);
     const direction = new Phaser.Math.Vector2(dx, dy).normalize().scale(COIN_DASH.playerSpeed);
     this.player.body.setVelocity(direction.x, direction.y);
+    this.updateHunter();
     const seconds = Math.max(0, Math.ceil((this.deadline - this.time.now) / 1000));
     this.hud.setText(`Coins: ${this.score}   Best: ${this.best}   Time: ${seconds}s`);
     this.updatePowerUps();

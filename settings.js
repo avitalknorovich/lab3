@@ -6,7 +6,10 @@ window.COIN_DASH = {
   playerSpeed: 240,
   droneSpeed: 105,
   droneCount: 3,
-  colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a },
+  hunterDelay: 15,
+  hunterSpeed: 90,
+  hunterSize: 20,
+  colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a, hunter: 0xff9f1c },
   powerups: {
     spawnMinSeconds: 8,
     spawnMaxSeconds: 12,
