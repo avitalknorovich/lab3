@@ -34,6 +34,12 @@
       trail: 0xbff3ff, coinGlow: 0xffe27a, droneGlow: 0xff4a80, burst: 0xe8f8ff, burst2: 0x7fd4ff,
       hud: 0xe0f7ff, hudFx: 0x9fe4ff, hudGlow: 0x8fe0ff, level: 0xc9b8ff, frame: 0x9fe4ff, frame2: 0xc9b8ff }
   ];
+  // Boss theme: replaces the cycling theme on every 5th level (not part of the cycle).
+  const BOSS = { name: 'Crimson Wrath', boss: true, style: 'boss', bgTop: 0x1a0000, bgBot: 0x000000, line: 0x5a0a0a, lineA: 0.5,
+    grid: 0xff1a1a, gridA: 0.3, drift: 26, dir: [0, 1], p1: 0xff3a1a, p2: 0xffc04a, starA: 0,
+    player: 0xffe0d0, coin: 0xffd166, drone: 0xff1a2a, hunter: 0xffffff,
+    trail: 0xff4a3a, coinGlow: 0xffb000, droneGlow: 0xff0000, burst: 0xff4a1a, burst2: 0xffc04a,
+    hud: 0xffb0a0, hudFx: 0xff5a4a, hudGlow: 0xff0000, level: 0xff4a4a, frame: 0xff1111, frame2: 0xaa0000 };
   const COLOR_KEYS = ['bgTop', 'bgBot', 'line', 'grid', 'p1', 'p2', 'player', 'coin', 'drone', 'hunter', 'trail',
     'coinGlow', 'droneGlow', 'burst', 'burst2', 'hud', 'hudFx', 'hudGlow', 'level', 'frame', 'frame2'];
   const NUM_KEYS = ['lineA', 'gridA', 'drift', 'starA'];
@@ -43,7 +49,8 @@
     const ch = (s) => Math.round(((a >> s) & 255) * (1 - k) + ((b >> s) & 255) * k);
     return (ch(16) << 16) | (ch(8) << 8) | ch(0);
   };
-  const get = (level) => THEMES[(((level || 1) - 1) % THEMES.length + THEMES.length) % THEMES.length];
+  const isBoss = (level) => level > 0 && level % COIN_DASH.boss.every === 0;
+  const get = (level) => isBoss(level) ? BOSS : THEMES[(((level || 1) - 1) % THEMES.length + THEMES.length) % THEMES.length];
 
   // Page glow: one injected rule reads CSS custom properties set on <html>.
   function ensureCss() {
@@ -63,6 +70,7 @@
   }
 
   function newParticle(st, W, H, first) {
+    if (st === 'boss') st = 'embers';
     const p = { x: Math.random() * W, y: first ? 44 + Math.random() * (H - 44) : H + 10, ph: Math.random() * 6.28,
       s: 0.5 + Math.random(), len: 5 + Math.floor(Math.random() * 6) };
     if (st === 'bubbles') { p.r = 2 + Math.random() * 5; p.vy = -(18 + Math.random() * 30); }
@@ -75,7 +83,7 @@
 
   function initParticles(S, st) {
     S.style = st; S.parts = [];
-    const n = { bubbles: 26, embers: 38, snow: 34, orbs: 9, digits: 26 }[st] || 0;
+    const n = { boss: 44, bubbles: 26, embers: 38, snow: 34, orbs: 9, digits: 26 }[st] || 0;
     for (let i = 0; i < n; i++) S.parts.push(newParticle(st, COIN_DASH.width, COIN_DASH.height, true));
   }
 
@@ -83,7 +91,7 @@
     const g = S.pg, W = COIN_DASH.width, H = COIN_DASH.height, cur = S.cur, t = S.t;
     g.clear();
     S.parts.forEach((p, i) => {
-      const st = S.style;
+      const st = S.style === 'boss' ? 'embers' : S.style;
       p.y += p.vy * dt;
       if (st === 'bubbles') {
         p.x += Math.sin(t * p.s + p.ph) * 12 * dt;
@@ -117,6 +125,13 @@
       else if (st === 'orbs' && p.y < 20) p.y = H + 20;
       else if (off) Object.assign(p, newParticle(st, W, H, false));
     });
+    if (S.style === 'boss') {
+      // Pulsing red vignette: nested frame bands with a heartbeat pulse.
+      const pulse = 0.5 + 0.5 * Math.sin(t * 5);
+      for (let k = 0; k < 8; k++) {
+        g.lineStyle(10, 0xff0000, (0.06 + 0.16 * pulse) * (1 - k / 8)).strokeRect(5 + k * 8, 49 + k * 8, W - 10 - k * 16, H - 54 - k * 16);
+      }
+    }
   }
 
   function paint(scene, S) {
@@ -191,5 +206,5 @@
     } catch (e) { console.warn('Theme apply failed', e); }
   }
 
-  window.THEMES = Object.assign(THEMES, { apply, get });
+  window.THEMES = Object.assign(THEMES, { apply, get, isBoss });
 })();
