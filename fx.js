@@ -105,8 +105,14 @@
     } catch (e) { /* decoration only */ }
   }
 
-  function shake(scene) {
-    try { scene.cameras.main.shake(fxc().shakeMs, fxc().shakeIntensity); } catch (e) { /* ignore */ }
+  // Intensity and duration grow with the level (capped); `scale` < 1 gives small shakes (banners, shield).
+  function shake(scene, scale) {
+    try {
+      const f = fxc(), lv = Math.max(0, (scene.level || 1) - 1), k = scale || 1;
+      const inten = Math.min(f.shakeMaxIntensity, f.shakeIntensity + lv * f.shakeLevelIntensity);
+      const ms = Math.min(f.shakeMaxMs, f.shakeMs + lv * f.shakeLevelMs);
+      scene.cameras.main.shake(ms * Math.max(k, 0.5), inten * k);
+    } catch (e) { /* ignore */ }
   }
 
   window.FX = { setup, burst, shake };

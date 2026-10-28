@@ -18,8 +18,11 @@ window.COIN_DASH = {
     gridColor: 0xff2bd6, gridAlpha: 0.18, gridDrift: 10, starColor: 0x9ad8ff, starCount: 40,
     burstColor: 0xffe27a, burstColor2: 0xff2bd6, burstCount: 16,
     hudColor: '#7dfcff', hudFxColor: '#ff9cf0', hudGlow: '#00e5ff',
-    shakeMs: 250, shakeIntensity: 0.012
+    shakeMs: 250, shakeIntensity: 0.012,
+    shakeLevelIntensity: 0.0012, shakeLevelMs: 12, shakeMaxIntensity: 0.03, shakeMaxMs: 500, shakeSmall: 0.4
   },
+  drama: { slowMoMs: 900, slowMoFactor: 4, zoom: 1.45, zoomInMs: 450, zoomOutMs: 350 },
+  boss: { every: 5, droneSpeedBoost: 1.25 },
   powerups: {
     spawnMinSeconds: 8,
     spawnMaxSeconds: 12,
