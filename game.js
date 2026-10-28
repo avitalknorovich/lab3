@@ -39,7 +39,7 @@ class CoinDash extends Phaser.Scene {
     }
     this.physics.add.overlap(this.player, this.coin, () => {
       if (this.finished) return;
-      this.score++;
+      this.score++; window.SFX?.coin();
       this.placeCoin();
     });
     this.physics.add.overlap(this.player, this.drones, () => this.onDroneHit());
@@ -54,7 +54,7 @@ class CoinDash extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('W,A,S,D,R');
     this.input.keyboard.on('keydown-R', () => this.scene.restart());
-    this.paused = false;
+    this.paused = false; window.SFX?.start();
     this.input.keyboard.on('keydown-P', () => this.togglePause());
     this.input.keyboard.on('keydown-ESC', () => this.togglePause());
   }
@@ -64,7 +64,7 @@ class CoinDash extends Phaser.Scene {
     const c = COIN_DASH;
     this.paused = !this.paused;
     if (this.paused) {
-      this.pausedAt = this.time.now;
+      this.pausedAt = this.time.now; window.SFX?.pause();
       this.physics.pause();
       this.pauseOverlay = this.add.container(c.width / 2, c.height / 2, [
         this.add.rectangle(0, 0, 460, 90, 0x0a1120, 0.95),
@@ -80,7 +80,7 @@ class CoinDash extends Phaser.Scene {
       this.graceUntil += dt;
       if (this.slowUntil) this.slowUntil += dt;
       if (this.pickup) this.pickup.expiresAt += dt;
-      this.physics.resume();
+      this.physics.resume(); window.SFX?.resume();
       this.pauseOverlay.destroy();
     }
   }
@@ -141,9 +141,9 @@ class CoinDash extends Phaser.Scene {
   onDroneHit() {
     if (this.finished) return;
     if (this.time.now < this.graceUntil) return;
-    if (!this.shield) return this.finish('A drone caught you!');
+    if (!this.shield) { window.SFX?.hit(); return this.finish('A drone caught you!'); }
     // Shield absorbs the hit; flash the player and ignore the same drone briefly.
-    this.shield = false;
+    this.shield = false; window.SFX?.shield();
     this.graceUntil = this.time.now + 600;
     this.tweens.add({ targets: this.player, alpha: 0.2, duration: 80, yoyo: true, repeat: 4 });
   }
@@ -155,7 +155,7 @@ class CoinDash extends Phaser.Scene {
       // Appear in the corner farthest from the player.
       const x = this.player.x < c.width / 2 ? c.width - 30 : 30;
       const y = this.player.y < c.height / 2 ? c.height - 30 : 74;
-      this.hunter.setVisible(true).setPosition(x, y);
+      this.hunter.setVisible(true).setPosition(x, y); window.SFX?.hunter();
       this.hunter.body.enable = true;
       this.hunter.body.reset(x, y);
     }
@@ -174,6 +174,7 @@ class CoinDash extends Phaser.Scene {
       if (now >= p.expiresAt) {
         this.removePickup();
       } else if (Phaser.Math.Distance.Between(p.shape.x, p.shape.y, this.player.x, this.player.y) < 22) {
+        window.SFX?.powerup();
         if (p.kind === 'shield') {
           this.shield = true;
         } else {
@@ -208,7 +209,7 @@ class CoinDash extends Phaser.Scene {
 
   finish(reason) {
     if (this.finished) return;
-    this.finished = true;
+    this.finished = true; window.SFX?.stop(); window.SFX?.gameOver();
     this.physics.pause();
     const c = COIN_DASH;
     const isNewBest = this.score > this.best;

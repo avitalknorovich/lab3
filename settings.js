@@ -9,6 +9,7 @@ window.COIN_DASH = {
   hunterDelay: 15,
   hunterSpeed: 90,
   hunterSize: 20,
+  sound: { master: 0.5, sfx: 0.5, music: 0.12, tempo: 110 },
   colors: { background: 0x101c31, player: 0x71e8ce, coin: 0xffd166, drone: 0xff657a, hunter: 0xff9f1c },
   powerups: {
     spawnMinSeconds: 8,
